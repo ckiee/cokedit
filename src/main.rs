@@ -1,5 +1,7 @@
 extern crate crossterm;
 extern crate structopt;
+// #[macro_use]
+extern crate lalrpop_util;
 
 use std::fs::File;
 use std::io::Read;
@@ -7,6 +9,7 @@ use std::io::Read;
 use crossterm::terminal;
 use structopt::StructOpt;
 
+// mod conf;
 mod keys;
 mod tui;
 mod util;
@@ -23,14 +26,14 @@ fn main() {
         buf: String::new(),
         opt,
         scroll: 0,
-        cursor: (0, 0),
+        pos: 0,
     };
     let mut file = File::open(&editor.opt.file).unwrap();
     file.read_to_string(&mut editor.buf).unwrap();
 
     tui::draw(&mut editor).unwrap();
     loop {
-        keys::handle_keys().unwrap();
+        keys::handle_keys(&mut editor).unwrap();
         tui::draw(&mut editor).unwrap();
     }
 }

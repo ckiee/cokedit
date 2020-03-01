@@ -6,7 +6,7 @@ use crossterm::{
     Result,
 };
 
-pub fn handle_keys() -> Result<()> {
+pub fn handle_keys(editor: &mut util::Editor) -> Result<()> {
     match event::read()? {
         Event::Key(k) => match k {
             KeyEvent {
@@ -16,7 +16,29 @@ pub fn handle_keys() -> Result<()> {
             KeyEvent {
                 code: KeyCode::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            } => println!("char: {}", ch),
+            } => {
+                editor.buf.insert(editor.pos, ch);
+            }
+            KeyEvent {
+                code: KeyCode::Backspace,
+                ..
+            } if editor.pos != 0 => {
+                editor.buf.remove(editor.pos - 1);
+            }
+            KeyEvent {
+                code: KeyCode::Delete,
+                ..
+            } if editor.pos != editor.buf.chars().count() - 1 => {
+                editor.buf.remove(editor.pos);
+            }
+            KeyEvent {
+                code: KeyCode::Right,
+                ..
+            } => editor.pos += 1,
+            KeyEvent {
+                code: KeyCode::Left,
+                ..
+            } => editor.pos -= 1,
             _ => {}
         },
         _ => {}
