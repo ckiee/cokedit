@@ -1,0 +1,49 @@
+use std::str::FromStr;
+use crate::ast::*;
+use crossterm::event::KeyModifiers;
+
+grammar;
+
+pub Statement: Statement = {
+    Expr => Statement::Expr(<>),
+    "bindsym" <b:KeyBind> <e:Expr> => Statement::Bindsym(b, e)
+}
+
+pub Expr: Expr = {
+	"exit" => Expr::Exit(0),
+    "exit" <code: i32> => Expr::Exit(code),
+    "exec" <cmd: str> => Expr::Exec(cmd.to_string()),
+    MoveDirection MoveType => Expr::Move(<>)
+}
+
+MoveType: MoveType = {
+    "char" => MoveType::Char,
+    "line" => MoveType::Line
+}
+
+MoveDirection: MoveDirection = {
+    "next" => MoveDirection::Next,
+    "prev" => MoveDirection::Last,
+};
+
+KeyBind: KeyBind = {
+    <km: KeyModifiers> "+" <l: letter> => KeyBind(km, l)
+}
+
+KeyModifiers: KeyModifiers = {
+    "Shift" => KeyModifiers::SHIFT,
+    "Ctrl" => KeyModifiers::CONTROL,
+    "Alt" => KeyModifiers::ALT,
+}
+
+i32: i32 = {
+    r"[0-9]+" => i32::from_str(<>).unwrap()
+};
+
+letter: char = {
+    r"[a-z]" => <>.chars().next().unwrap()
+}
+
+str: &'input str = {
+    r#"".+""# => &<>[1..<>.len() - 1]
+}
