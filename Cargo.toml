@@ -10,6 +10,7 @@ build = "build.rs"
 lalrpop = "0.17.2"
 
 [dependencies]
+platform-dirs = "0.2.0"
 structopt = "0.3.9"
 lalrpop-util = "0.17.2"
 regex = "1"

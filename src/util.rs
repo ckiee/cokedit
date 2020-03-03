@@ -1,30 +1,68 @@
-use crossterm::terminal;
+use crate::ast::{Expr, KeyBind, Statement};
+use crossterm::{terminal, ExecutableCommand};
+use std::collections::HashMap;
+use std::fs::{self, File};
+use std::io::{Read, Result, Write};
+use std::path::Path;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+lalrpop_mod!(pub config);
+
+pub fn read_config(file: &Path) -> Result<Vec<Statement>> {
+	let mut f = File::open(file)?;
+	let mut buffer = String::new();
+	f.read_to_string(&mut buffer)?;
+	let parser = config::StatementParser::new();
+	Ok(buffer
+		.lines()
+		.filter(|l| !l.starts_with("#"))
+		.filter(|l| !l.trim().is_empty())
+		.map(|l| parser.parse(l).unwrap())
+		.collect())
+}
+pub fn config_to_editor(folder: &PathBuf, editor: &mut Editor) -> Result<()> {
+	let mut file = folder.clone();
+	file.push("config");
+	fs::create_dir_all(folder)?;
+	if !file.exists() {
+		let mut file = File::create(&file).unwrap();
+		file.write_all(&crate::consts::DEFAULT.as_bytes()).unwrap();
+		file.flush().unwrap();
+	};
+	let stmts = read_config(&file)?;
+	for stmt in stmts {
+		match stmt {
+			Statement::Bindsym(kb, exp) => editor.keybinds.insert(kb, exp),
+			_ => panic!("Statement Unimplemented"),
+		};
+	}
+	Ok(())
+}
 pub fn cleanup() {
 	terminal::disable_raw_mode().unwrap();
-	// std::io::stdout()
-	//     .execute(terminal::Clear(terminal::ClearType::All))
-	//     .unwrap();
 }
 pub fn exit(code: i32) {
 	cleanup();
+	std::io::stdout()
+		.execute(terminal::Clear(terminal::ClearType::All))
+		.unwrap();
 	std::process::exit(code);
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(StructOpt, Debug, Clone)]
 #[structopt(name = "cokedit")]
 pub struct Opt {
 	#[structopt(name = "FILE", parse(from_os_str))]
 	pub file: PathBuf,
 }
-
+#[derive(Clone)]
 pub struct Editor {
 	pub buf: String,
 	pub opt: Opt,
 	pub scroll: usize,
 	pub pos: usize,
+	pub keybinds: HashMap<KeyBind, Expr>,
 }
 
 impl Editor {
