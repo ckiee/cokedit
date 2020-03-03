@@ -1,6 +1,5 @@
 use crossterm::event::KeyModifiers;
-
-lalrpop_mod!(pub config);
+use std::hash::Hash;
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]

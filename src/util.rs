@@ -1,5 +1,5 @@
 use crate::ast::{Expr, KeyBind, Statement};
-use crossterm::{terminal, ExecutableCommand};
+use crossterm::{cursor, terminal, QueueableCommand};
 use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::{Read, Result, Write};
@@ -44,9 +44,12 @@ pub fn cleanup() {
 }
 pub fn exit(code: i32) {
 	cleanup();
-	std::io::stdout()
-		.execute(terminal::Clear(terminal::ClearType::All))
+	let mut stdout = std::io::stdout();
+	stdout.queue(cursor::MoveTo(0, 0)).unwrap();
+	stdout
+		.queue(terminal::Clear(terminal::ClearType::All))
 		.unwrap();
+	stdout.flush().unwrap();
 	std::process::exit(code);
 }
 
