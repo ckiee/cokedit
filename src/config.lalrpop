@@ -13,7 +13,8 @@ pub Expr: Expr = {
 	"exit" => Expr::Exit(0),
     "exit" <code: i32> => Expr::Exit(code),
     "exec" <cmd: str> => Expr::Exec(cmd.to_string()),
-    MoveDirection MoveType => Expr::Move(<>)
+    MoveDirection MoveType => Expr::Move(<>),
+    "delete_offset" <offset: usize> => Expr::DeleteOffset(offset)
 }
 
 MoveType: MoveType = {
@@ -39,6 +40,11 @@ KeyModifiers: KeyModifiers = {
 i32: i32 = {
     r"[0-9]+" => i32::from_str(<>).unwrap()
 };
+
+usize: usize = {
+    r"[0-9]+" => usize::from_str(<>).unwrap()
+};
+
 
 letter: char = {
     r"[a-z]" => <>.chars().next().unwrap()

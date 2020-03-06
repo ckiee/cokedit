@@ -1,4 +1,4 @@
-use crate::ast::{Expr, KeyBind, Statement};
+use crate::ast::{Expr, KeyBind, MoveDirection, MoveType, Statement};
 use crossterm::{cursor, terminal, QueueableCommand};
 use std::collections::HashMap;
 use std::fs::{self, File};
@@ -8,6 +8,30 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 lalrpop_mod!(pub config);
+
+pub fn exec_expr(expr: Expr, editor: &mut Editor) {
+	match expr {
+		Expr::Exit(n) => exit(n),
+		Expr::Move(MoveDirection::Next, MoveType::Char) => {
+			if editor.pos != editor.buf.chars().count() {
+				editor.pos += 1;
+			}
+		}
+		Expr::Move(MoveDirection::Last, MoveType::Char) => {
+			if editor.pos != 0 {
+				editor.pos -= 1;
+			}
+		}
+		Expr::DeleteOffset(offset) => {
+			let tdl = editor.pos - offset;
+			if tdl < editor.buf.chars().count() {
+				editor.buf.remove(tdl);
+				editor.pos -= offset;
+			}
+		}
+		_ => panic!("unimplemented expression type"),
+	}
+}
 
 pub fn read_config(file: &Path) -> Result<Vec<Statement>> {
 	let mut f = File::open(file)?;

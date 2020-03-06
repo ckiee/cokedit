@@ -1,5 +1,5 @@
+use crate::ast::{Expr, MoveDirection, MoveType};
 use crate::util;
-
 use crossterm::{
     event,
     event::{Event, KeyCode, KeyEvent, KeyModifiers},
@@ -18,27 +18,25 @@ pub fn handle_keys(editor: &mut util::Editor) -> Result<()> {
                 modifiers: KeyModifiers::NONE,
             } => {
                 editor.buf.insert(editor.pos, ch);
+                editor.pos += 1;
             }
             KeyEvent {
                 code: KeyCode::Backspace,
                 ..
-            } if editor.pos != 0 => {
-                editor.buf.remove(editor.pos - 1);
-            }
+            } => util::exec_expr(Expr::DeleteOffset(1), editor),
+
             KeyEvent {
                 code: KeyCode::Delete,
                 ..
-            } if editor.pos != editor.buf.chars().count() - 1 => {
-                editor.buf.remove(editor.pos);
-            }
+            } => util::exec_expr(Expr::DeleteOffset(0), editor),
             KeyEvent {
                 code: KeyCode::Right,
                 ..
-            } => editor.pos += 1,
+            } => util::exec_expr(Expr::Move(MoveDirection::Next, MoveType::Char), editor),
             KeyEvent {
                 code: KeyCode::Left,
                 ..
-            } => editor.pos -= 1,
+            } => util::exec_expr(Expr::Move(MoveDirection::Last, MoveType::Char), editor),
             _ => {}
         },
         _ => {}

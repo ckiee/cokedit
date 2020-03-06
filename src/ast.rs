@@ -13,10 +13,12 @@ pub enum Statement {
 pub enum Expr {
 	// exit 0
 	Exit(i32),
-	// exec "hello"
+	// exec "ssh boo.local poweroff"
 	Exec(String),
 	// next/last line/char
 	Move(MoveDirection, MoveType),
+
+	DeleteOffset(usize),
 }
 #[derive(PartialEq, Debug, Clone)]
 pub enum MoveDirection {
