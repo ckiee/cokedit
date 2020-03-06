@@ -41,7 +41,7 @@ fn main() {
 	terminal::enable_raw_mode().unwrap();
 	tui::draw(&mut editor).unwrap();
 	loop {
-		keys::handle_keys(&mut editor).unwrap();
+		keys::handle_events(&mut editor).unwrap();
 		tui::draw(&mut editor).unwrap();
 	}
 }

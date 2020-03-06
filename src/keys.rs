@@ -6,7 +6,7 @@ use crossterm::{
     Result,
 };
 
-pub fn handle_keys(editor: &mut util::Editor) -> Result<()> {
+pub fn handle_events(editor: &mut util::Editor) -> Result<()> {
     match event::read()? {
         Event::Key(k) => match k {
             KeyEvent {
